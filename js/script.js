@@ -79,6 +79,9 @@ function shuffleBoard() {
   renderBoard();
   winMessageEl.classList.add("hidden");
   startTimer();
+  hintsRemaining = MAX_HINTS;
+  hintCountEl.textContent = hintsRemaining;
+  hintBtn.disabled = false;
 }
 
 document.getElementById("shuffle-btn").addEventListener("click", shuffleBoard);
@@ -154,6 +157,38 @@ function handleSolved() {
   winSummaryEl.textContent = `${moveCount} moves, ${formatTime(elapsedSeconds)}`;
   winMessageEl.classList.remove("hidden");
 }
+
+// ---------- Magic hint (Undergrad track) ----------
+const MAX_HINTS = 3;
+let hintsRemaining = MAX_HINTS;
+const hintCountEl = document.getElementById("hint-count");
+const hintBtn = document.getElementById("hint-btn");
+
+function findHintMove() {
+  // Find a tile that is not in its solved position and is adjacent
+  // to the empty slot; sliding it is always a legal, useful move.
+  const emptyIndex = getEmptyIndex();
+  const neighbors = getNeighborIndices(emptyIndex);
+  for (const n of neighbors) {
+    if (tiles[n] !== EMPTY && tiles[n] !== n + 1) {
+      return n;
+    }
+  }
+  return neighbors[0];
+}
+
+hintBtn.addEventListener("click", () => {
+  if (hintsRemaining <= 0) return;
+  const index = findHintMove();
+  const tileEl = boardEl.querySelector(`[data-index="${index}"]`);
+  if (tileEl) {
+    tileEl.classList.add("hint-glow");
+    setTimeout(() => tileEl.classList.remove("hint-glow"), 1500);
+  }
+  hintsRemaining--;
+  hintCountEl.textContent = hintsRemaining;
+  hintBtn.disabled = hintsRemaining <= 0;
+});
 
 // ---------- Theme switching ----------
 const modeButtons = document.querySelectorAll(".mode-btn");
