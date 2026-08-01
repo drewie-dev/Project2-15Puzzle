@@ -133,6 +133,47 @@ body[data-theme="sunset"] {
   --text-color: #fff5f0;
 }
 
+/* ---------- Track select ---------- */
+.track-select {
+  display: flex;
+  gap: 1.25rem;
+  font-size: 0.9rem;
+}
+
+.track-select label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+}
+
+/* ---------- Analytics ---------- */
+.analytics {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.analytics-grid .stat {
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 8px;
+  padding: 0.5rem;
+}
+
+@media (max-width: 420px) {
+  .analytics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 /* ---------- Board ---------- */
 .board-wrap {
   display: flex;
@@ -159,22 +200,17 @@ body[data-theme="sunset"] {
   font-size: 1.5rem;
   font-weight: 700;
   cursor: pointer;
-  background-size: cover;
-  background-position: center;
+  background-repeat: no-repeat;
   color: white;
   text-shadow: 0 1px 3px rgba(0,0,0,0.5);
   background-color: var(--tile-color, #3b82f6);
   transition: transform 0.12s ease;
   user-select: none;
+  overflow: hidden;
 }
 
 .tile:hover {
   transform: scale(1.03);
-}
-
-.tile-icon {
-  font-size: 1.6rem;
-  line-height: 1;
 }
 
 .tile-number {
@@ -182,7 +218,9 @@ body[data-theme="sunset"] {
   bottom: 4px;
   right: 6px;
   font-size: 0.7rem;
-  opacity: 0.85;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 1px 5px;
+  border-radius: 6px;
 }
 
 .tile {
@@ -253,9 +291,5 @@ body[data-theme="sunset"] {
 
   .game-stats {
     gap: 1rem;
-  }
-
-  .tile-icon {
-    font-size: 1.2rem;
   }
 }

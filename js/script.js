@@ -1,12 +1,33 @@
 // ---------- Theme tile icons ----------
 // Each theme maps tile numbers 1-15 to an icon. These are placeholder
-// emoji so the puzzle is themed, will swap for custom image
+// emoji so the puzzle is themed out of the box; swap for custom image
 
-const THEME_ICONS = {
-  boardwalk: ["🍦","🏄","🩴","🕶️","🎡","🍉","🦩","⛱️","🍹","🎠","🩱","🌴","🏖️","🍧","☀️"],
-  tidepool:  ["🐚","⭐","🐠","🪸","🦀","🐬","🌊","🐡","🦑","🐢","🦐","🪼","🐙","🫧","🐋"],
-  sunset:    ["🌅","🌴","☀️","🌊","🦩","🏝️","🌇","🐚","⛵","🌤️","🦜","🍹","🌺","🪷","🌙"],
+function themePhotoPath(theme) {
+  return `assets/photos/${theme}.jpg`;
+}
+
+function tileBackgroundPosition(number) {
+  const homeIndex = number - 1; // 0-14, home slot for this tile
+  const row = Math.floor(homeIndex / SIZE);
+  const col = homeIndex % SIZE;
+  const step = 100 / (SIZE - 1); // 33.333% steps across a 4x4 grid
+  return `${col * step}% ${row * step}%`;
+}
+
+// ---------- Track config (Undergrad vs Graduate) ----------
+// Graduate track: stronger randomization, more limited hint support,
+// to emphasize strategy over assisted play (per hub track expectations).
+const TRACKS = {
+  undergrad: { shuffleMoves: 240, maxHints: 3 },
+  graduate: { shuffleMoves: 400, maxHints: 1 },
 };
+let currentTrack = "undergrad";
+
+document.querySelectorAll('input[name="track"]').forEach((radio) => {
+  radio.addEventListener("change", (e) => {
+    currentTrack = e.target.value;
+  });
+});
 
 // ---------- Puzzle state ----------
 const SIZE = 4;
@@ -32,9 +53,12 @@ function renderBoard() {
     const tileEl = document.createElement("div");
     tileEl.className = "tile" + (value === EMPTY ? " empty" : "");
     tileEl.dataset.index = index;
+    if (value !== EMPTY) tileEl.tabIndex = 0;
     if (value !== EMPTY) {
-      const icon = THEME_ICONS[currentTheme][value - 1];
-      tileEl.innerHTML = `<span class="tile-icon">${icon}</span><span class="tile-number">${value}</span>`;
+      tileEl.style.backgroundImage = `url(${themePhotoPath(currentTheme)})`;
+      tileEl.style.backgroundPosition = tileBackgroundPosition(value);
+      tileEl.style.backgroundSize = `${SIZE * 100}% ${SIZE * 100}%`;
+      tileEl.innerHTML = `<span class="tile-number">${value}</span>`;
     }
     boardEl.appendChild(tileEl);
   });
@@ -44,7 +68,7 @@ function renderBoard() {
 // Shuffles by making random valid slide moves from the solved state.
 // This guarantees the result is always solvable, unlike a random
 // permutation (half of which are unsolvable for the 15 puzzle).
-const SHUFFLE_MOVES = 240;
+const SHUFFLE_MOVES = 240; // fallback; overridden by TRACKS[currentTrack].shuffleMoves
 
 function getEmptyIndex() {
   return tiles.indexOf(EMPTY);
@@ -66,7 +90,8 @@ function shuffleBoard() {
   let emptyIndex = getEmptyIndex();
   let lastIndex = -1;
 
-  for (let i = 0; i < SHUFFLE_MOVES; i++) {
+  const shuffleMoves = TRACKS[currentTrack].shuffleMoves;
+  for (let i = 0; i < shuffleMoves; i++) {
     const neighbors = getNeighborIndices(emptyIndex).filter(n => n !== lastIndex);
     const swapWith = neighbors[Math.floor(Math.random() * neighbors.length)];
     [tiles[emptyIndex], tiles[swapWith]] = [tiles[swapWith], tiles[emptyIndex]];
@@ -79,7 +104,7 @@ function shuffleBoard() {
   renderBoard();
   winMessageEl.classList.add("hidden");
   startTimer();
-  hintsRemaining = MAX_HINTS;
+  hintsRemaining = TRACKS[currentTrack].maxHints;
   hintCountEl.textContent = hintsRemaining;
   hintBtn.disabled = false;
 }
@@ -141,6 +166,45 @@ boardEl.addEventListener("click", (e) => {
   }
 });
 
+// ---------- Analytics ----------
+const STATS_KEY = "puzzle15_stats";
+const MODE_LABELS = { boardwalk: "Beach Boardwalk", tidepool: "Tide Pool", sunset: "Sunset Skyline" };
+
+function getStats() {
+  try {
+    return JSON.parse(localStorage.getItem(STATS_KEY)) || [];
+  } catch {
+    return [];
+  }
+}
+
+function recordSolve(mode, moves, time) {
+  const stats = getStats();
+  stats.push({ mode, moves, time });
+  localStorage.setItem(STATS_KEY, JSON.stringify(stats));
+}
+
+function updateAnalytics(mode) {
+  const entries = getStats().filter((s) => s.mode === mode);
+  document.getElementById("analytics-mode-label").textContent = MODE_LABELS[mode] || mode;
+  document.getElementById("stat-games").textContent = entries.length;
+
+  if (entries.length === 0) {
+    document.getElementById("stat-best-moves").textContent = "—";
+    document.getElementById("stat-best-time").textContent = "—";
+    document.getElementById("stat-avg-moves").textContent = "—";
+    return;
+  }
+
+  const bestMoves = Math.min(...entries.map((e) => e.moves));
+  const bestTime = Math.min(...entries.map((e) => e.time));
+  const avgMoves = Math.round(entries.reduce((sum, e) => sum + e.moves, 0) / entries.length);
+
+  document.getElementById("stat-best-moves").textContent = bestMoves;
+  document.getElementById("stat-best-time").textContent = formatTime(bestTime);
+  document.getElementById("stat-avg-moves").textContent = avgMoves;
+}
+
 // ---------- Win detection ----------
 function isSolved() {
   for (let i = 0; i < 15; i++) {
@@ -156,11 +220,12 @@ function handleSolved() {
   stopTimer();
   winSummaryEl.textContent = `${moveCount} moves, ${formatTime(elapsedSeconds)}`;
   winMessageEl.classList.remove("hidden");
+  recordSolve(currentTheme, moveCount, elapsedSeconds);
+  updateAnalytics(currentTheme);
 }
 
 // ---------- Magic hint (Undergrad track) ----------
-const MAX_HINTS = 3;
-let hintsRemaining = MAX_HINTS;
+let hintsRemaining = TRACKS[currentTrack].maxHints;
 const hintCountEl = document.getElementById("hint-count");
 const hintBtn = document.getElementById("hint-btn");
 
@@ -271,6 +336,7 @@ modeButtons.forEach((btn) => {
     document.body.dataset.theme = currentTheme;
     renderBoard();
     loadLeaderboard(currentTheme);
+    updateAnalytics(currentTheme);
   });
 });
 
@@ -287,4 +353,6 @@ document.getElementById('save-score-btn').addEventListener('click', async () => 
 tiles = createSolvedBoard();
 renderBoard();
 document.body.dataset.theme = currentTheme;
+hintCountEl.textContent = hintsRemaining;
 loadLeaderboard(currentTheme);
+updateAnalytics(currentTheme);
