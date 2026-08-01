@@ -68,5 +68,28 @@ function shuffleBoard() {
   renderBoard();
 }
 
+// ---------- Move handling ----------
+function isAdjacent(indexA, indexB) {
+  return getNeighborIndices(indexA).includes(indexB);
+}
+
+function tryMoveTile(index) {
+  const emptyIndex = getEmptyIndex();
+  if (!isAdjacent(index, emptyIndex)) return false;
+
+  [tiles[index], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[index]];
+  moveCount++;
+  moveCountEl.textContent = moveCount;
+  renderBoard();
+  return true;
+}
+
+boardEl.addEventListener("click", (e) => {
+  const tileEl = e.target.closest(".tile");
+  if (!tileEl || tileEl.classList.contains("empty")) return;
+  const index = parseInt(tileEl.dataset.index, 10);
+  tryMoveTile(index);
+});
+
 tiles = createSolvedBoard();
 renderBoard();
