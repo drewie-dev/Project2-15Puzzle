@@ -1,3 +1,13 @@
+// ---------- Theme tile icons ----------
+// Each theme maps tile numbers 1-15 to an icon. These are placeholder
+// emoji so the puzzle is themed, will swap for custom image
+
+const THEME_ICONS = {
+  boardwalk: ["🍦","🏄","🩴","🕶️","🎡","🍉","🦩","⛱️","🍹","🎠","🩱","🌴","🏖️","🍧","☀️"],
+  tidepool:  ["🐚","⭐","🐠","🪸","🦀","🐬","🌊","🐡","🦑","🐢","🦐","🪼","🐙","🫧","🐋"],
+  sunset:    ["🌅","🌴","☀️","🌊","🦩","🏝️","🌇","🐚","⛵","🌤️","🦜","🍹","🌺","🪷","🌙"],
+};
+
 // ---------- Puzzle state ----------
 const SIZE = 4;
 const EMPTY = 16; // represents the blank tile
@@ -23,7 +33,8 @@ function renderBoard() {
     tileEl.className = "tile" + (value === EMPTY ? " empty" : "");
     tileEl.dataset.index = index;
     if (value !== EMPTY) {
-      tileEl.textContent = value;
+      const icon = THEME_ICONS[currentTheme][value - 1];
+      tileEl.innerHTML = `<span class="tile-icon">${icon}</span><span class="tile-number">${value}</span>`;
     }
     boardEl.appendChild(tileEl);
   });
@@ -153,6 +164,7 @@ modeButtons.forEach((btn) => {
     btn.classList.add("active");
     currentTheme = btn.dataset.theme;
     document.body.dataset.theme = currentTheme;
+    renderBoard();
     loadLeaderboard(currentTheme);
   });
 });

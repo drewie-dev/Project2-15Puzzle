@@ -172,6 +172,25 @@ body[data-theme="sunset"] {
   transform: scale(1.03);
 }
 
+.tile-icon {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.tile-number {
+  position: absolute;
+  bottom: 4px;
+  right: 6px;
+  font-size: 0.7rem;
+  opacity: 0.85;
+}
+
+.tile {
+  position: relative;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .tile.empty {
   background: transparent;
   cursor: default;
