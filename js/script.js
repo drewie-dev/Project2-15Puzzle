@@ -66,6 +66,39 @@ function shuffleBoard() {
   moveCount = 0;
   moveCountEl.textContent = moveCount;
   renderBoard();
+  winMessageEl.classList.add("hidden");
+  startTimer();
+}
+
+document.getElementById("shuffle-btn").addEventListener("click", shuffleBoard);
+document.getElementById("reset-btn").addEventListener("click", shuffleBoard);
+
+// ---------- Timer ----------
+const timerEl = document.getElementById("timer");
+let elapsedSeconds = 0;
+let timerInterval = null;
+
+function formatTime(totalSeconds) {
+  const m = Math.floor(totalSeconds / 60).toString().padStart(2, "0");
+  const s = (totalSeconds % 60).toString().padStart(2, "0");
+  return `${m}:${s}`;
+}
+
+function startTimer() {
+  stopTimer();
+  elapsedSeconds = 0;
+  timerEl.textContent = formatTime(elapsedSeconds);
+  timerInterval = setInterval(() => {
+    elapsedSeconds++;
+    timerEl.textContent = formatTime(elapsedSeconds);
+  }, 1000);
+}
+
+function stopTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
 }
 
 // ---------- Move handling ----------
