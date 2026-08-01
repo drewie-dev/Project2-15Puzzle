@@ -144,5 +144,20 @@ function handleSolved() {
   winMessageEl.classList.remove("hidden");
 }
 
+// ---------- Theme switching ----------
+const modeButtons = document.querySelectorAll(".mode-btn");
+
+modeButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    modeButtons.forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentTheme = btn.dataset.theme;
+    document.body.dataset.theme = currentTheme;
+    loadLeaderboard(currentTheme);
+  });
+});
+
+// ---------- Init ----------
 tiles = createSolvedBoard();
 renderBoard();
+document.body.dataset.theme = currentTheme;
