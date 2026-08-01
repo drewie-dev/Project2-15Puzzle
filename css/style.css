@@ -111,6 +111,28 @@ main {
   cursor: not-allowed;
 }
 
+/* ---------- Themes ---------- */
+body[data-theme="boardwalk"] {
+  --bg-gradient: linear-gradient(135deg, #ffe29f, #ffa99f, #ff719a);
+  --accent-color: #ff5c8a;
+  --tile-color: #ff8fab;
+  --text-color: #3a2a2a;
+}
+
+body[data-theme="tidepool"] {
+  --bg-gradient: linear-gradient(135deg, #a1c4fd, #c2e9fb, #8fd3c8);
+  --accent-color: #0f9b8e;
+  --tile-color: #4fb0af;
+  --text-color: #0c2b30;
+}
+
+body[data-theme="sunset"] {
+  --bg-gradient: linear-gradient(135deg, #ff9a56, #ff6a88, #6a3093);
+  --accent-color: #ff6a88;
+  --tile-color: #d16ba5;
+  --text-color: #fff5f0;
+}
+
 /* ---------- Board ---------- */
 .board-wrap {
   display: flex;
