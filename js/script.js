@@ -229,6 +229,10 @@ function handleSolved() {
 }
 
 // ---------- Magic hint (Undergrad track) ----------
+let hintsRemaining = TRACKS[currentTrack].maxHints;
+const hintCountEl = document.getElementById("hint-count");
+const hintBtn = document.getElementById("hint-btn");
+
 function homeDistance(index, value) {
   // Manhattan distance between a board index and the tile's solved home
   const home = value - 1;
