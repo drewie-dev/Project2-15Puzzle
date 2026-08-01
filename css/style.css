@@ -153,6 +153,7 @@ body[data-theme="sunset"] {
   background: rgba(255, 255, 255, 0.85);
   border-radius: 12px;
   padding: 1rem;
+  color: #1f2937;
 }
 
 .analytics-grid {
@@ -262,6 +263,7 @@ body[data-theme="sunset"] {
   background: rgba(255, 255, 255, 0.85);
   border-radius: 12px;
   padding: 1rem;
+  color: #1f2937;
 }
 
 .leaderboard table {
