@@ -101,6 +101,7 @@ function shuffleBoard() {
 
   moveCount = 0;
   moveCountEl.textContent = moveCount;
+  lastMoveDestination = null;
   renderBoard();
   winMessageEl.classList.add("hidden");
   startTimer();
@@ -141,6 +142,8 @@ function stopTimer() {
 }
 
 // ---------- Move handling ----------
+let lastMoveDestination = null; // where the last-moved tile ended up
+
 function isAdjacent(indexA, indexB) {
   return getNeighborIndices(indexA).includes(indexB);
 }
@@ -150,6 +153,7 @@ function tryMoveTile(index) {
   if (!isAdjacent(index, emptyIndex)) return false;
 
   [tiles[index], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[index]];
+  lastMoveDestination = emptyIndex; // the tile that moved now lives here
   moveCount++;
   moveCountEl.textContent = moveCount;
   renderBoard();
@@ -225,21 +229,36 @@ function handleSolved() {
 }
 
 // ---------- Magic hint (Undergrad track) ----------
-let hintsRemaining = TRACKS[currentTrack].maxHints;
-const hintCountEl = document.getElementById("hint-count");
-const hintBtn = document.getElementById("hint-btn");
+function homeDistance(index, value) {
+  // Manhattan distance between a board index and the tile's solved home
+  const home = value - 1;
+  const r1 = Math.floor(index / SIZE), c1 = index % SIZE;
+  const r2 = Math.floor(home / SIZE), c2 = home % SIZE;
+  return Math.abs(r1 - r2) + Math.abs(c1 - c2);
+}
 
 function findHintMove() {
-  // Find a tile that is not in its solved position and is adjacent
-  // to the empty slot; sliding it is always a legal, useful move.
   const emptyIndex = getEmptyIndex();
   const neighbors = getNeighborIndices(emptyIndex);
-  for (const n of neighbors) {
-    if (tiles[n] !== EMPTY && tiles[n] !== n + 1) {
-      return n;
+  const candidates = neighbors.filter((n) => tiles[n] !== EMPTY);
+
+  let best = null;
+  let bestScore = -Infinity;
+
+  candidates.forEach((n) => {
+    const value = tiles[n];
+    if (value === n + 1) return; // already home, not a useful hint
+
+    let score = homeDistance(n, value) - homeDistance(emptyIndex, value);
+    if (n === lastMoveDestination) score -= 10; // avoid suggesting an undo
+
+    if (score > bestScore) {
+      bestScore = score;
+      best = n;
     }
-  }
-  return neighbors[0];
+  });
+
+  return best !== null ? best : (candidates[0] ?? neighbors[0]);
 }
 
 hintBtn.addEventListener("click", () => {
