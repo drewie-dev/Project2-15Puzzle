@@ -236,3 +236,26 @@ body[data-theme="sunset"] {
   padding: 0.4rem 0.5rem;
   border-bottom: 1px solid rgba(0,0,0,0.1);
 }
+
+/* ---------- Accessibility ---------- */
+.tile:focus-visible,
+.mode-btn:focus-visible,
+.controls button:focus-visible {
+  outline: 3px solid #111;
+  outline-offset: 2px;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 420px) {
+  .site-header h1 {
+    font-size: 1.75rem;
+  }
+
+  .game-stats {
+    gap: 1rem;
+  }
+
+  .tile-icon {
+    font-size: 1.2rem;
+  }
+}

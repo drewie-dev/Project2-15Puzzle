@@ -190,6 +190,76 @@ hintBtn.addEventListener("click", () => {
   hintBtn.disabled = hintsRemaining <= 0;
 });
 
+// ---------- Scores: API with local storage fallback ----------
+const LOCAL_KEY = 'puzzle15_scores';
+
+function getLocalScores() {
+  try {
+    return JSON.parse(localStorage.getItem(LOCAL_KEY)) || [];
+  } catch {
+    return [];
+  }
+}
+
+function saveLocalScore(entry) {
+  const scores = getLocalScores();
+  scores.push(entry);
+  localStorage.setItem(LOCAL_KEY, JSON.stringify(scores));
+}
+
+function getLocalLeaderboard(mode) {
+  return getLocalScores()
+    .filter((s) => s.mode === mode)
+    .sort((a, b) => a.moves - b.moves || a.time - b.time)
+    .slice(0, 10);
+}
+
+async function saveScore(player, mode, moves, time) {
+  const payload = { player, mode, moves, time };
+  try {
+    const res = await fetch('api/save_score.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Save failed');
+  } catch (err) {
+    // API/database unavailable — fall back to local storage
+    saveLocalScore(payload);
+  }
+}
+
+async function loadLeaderboard(mode) {
+  const bodyEl = document.getElementById('leaderboard-body');
+  let scores = [];
+  try {
+    const res = await fetch(`api/get_leaderboard.php?mode=${encodeURIComponent(mode)}`);
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Load failed');
+    scores = data.scores.map((s) => ({
+      player: s.player_name, mode: s.mode, moves: s.moves, time: s.solve_time,
+    }));
+  } catch (err) {
+    scores = getLocalLeaderboard(mode);
+  }
+
+  bodyEl.innerHTML = scores.map((s) => `
+    <tr>
+      <td>${escapeHtml(s.player)}</td>
+      <td>${escapeHtml(s.mode)}</td>
+      <td>${s.moves}</td>
+      <td>${formatTime(s.time)}</td>
+    </tr>
+  `).join('');
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
 // ---------- Theme switching ----------
 const modeButtons = document.querySelectorAll(".mode-btn");
 
@@ -204,7 +274,17 @@ modeButtons.forEach((btn) => {
   });
 });
 
+document.getElementById('save-score-btn').addEventListener('click', async () => {
+  const nameInput = document.getElementById('player-name');
+  const player = nameInput.value.trim() || 'Anonymous';
+  await saveScore(player, currentTheme, moveCount, elapsedSeconds);
+  winMessageEl.classList.add('hidden');
+  nameInput.value = '';
+  loadLeaderboard(currentTheme);
+});
+
 // ---------- Init ----------
 tiles = createSolvedBoard();
 renderBoard();
 document.body.dataset.theme = currentTheme;
+loadLeaderboard(currentTheme);
