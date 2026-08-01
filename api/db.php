@@ -1,12 +1,10 @@
 <?php
 // Database connection settings.
-// Update these values for your environment before deploying.
-// Do NOT commit real credentials — use environment-specific values.
+// Real credentials live in api/config.php, which is gitignored and
+// never committed. Copy api/config.example.php to api/config.php and
+// fill in your actual username/password there.
 
-$DB_HOST = getenv('PUZZLE_DB_HOST') ?: 'localhost';
-$DB_NAME = getenv('PUZZLE_DB_NAME') ?: 'puzzle15';
-$DB_USER = getenv('PUZZLE_DB_USER') ?: 'root';
-$DB_PASS = getenv('PUZZLE_DB_PASS') ?: '';
+require_once __DIR__ . '/config.php';
 
 function get_db_connection() {
     global $DB_HOST, $DB_NAME, $DB_USER, $DB_PASS;
