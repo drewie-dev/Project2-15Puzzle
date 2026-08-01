@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>15 Puzzle: Summer Edition</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-theme="boardwalk">
+
+<header class="site-header">
+  <h1>15 Puzzle</h1>
+  <p class="tagline">A themed sliding tile challenge</p>
+</header>
+
+<main>
+
+  <section class="mode-select" aria-label="Puzzle theme selection">
+    <button class="mode-btn active" data-theme="boardwalk">Beach Boardwalk</button>
+    <button class="mode-btn" data-theme="tidepool">Tide Pool</button>
+    <button class="mode-btn" data-theme="sunset">Sunset Skyline</button>
+  </section>
+
+  <section class="game-stats" aria-label="Game statistics">
+    <div class="stat">
+      <span class="stat-label">Moves</span>
+      <span class="stat-value" id="move-count">0</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Time</span>
+      <span class="stat-value" id="timer">00:00</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Hints</span>
+      <span class="stat-value" id="hint-count">3</span>
+    </div>
+  </section>
+
+  <section class="board-wrap" aria-label="Puzzle board">
+    <div id="board" class="board"></div>
+  </section>
+
+  <section class="controls">
+    <button id="shuffle-btn">Shuffle</button>
+    <button id="hint-btn">Use Hint</button>
+    <button id="reset-btn">Reset</button>
+  </section>
+
+  <div id="win-message" class="win-message hidden" role="status">
+    <p>Solved! <span id="win-summary"></span></p>
+    <label>
+      Save your score as:
+      <input type="text" id="player-name" maxlength="20" placeholder="Your name">
+    </label>
+    <button id="save-score-btn">Save Score</button>
+  </div>
+
+  <section class="leaderboard" aria-label="Leaderboard">
+    <h2>Leaderboard</h2>
+    <table id="leaderboard-table">
+      <thead>
+        <tr><th>Player</th><th>Mode</th><th>Moves</th><th>Time</th></tr>
+      </thead>
+      <tbody id="leaderboard-body"></tbody>
+    </table>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <p>Project 2 - Final Summer 2026</p>
+</footer>
+
+<script src="js/script.js"></script>
+</body>
+</html>
