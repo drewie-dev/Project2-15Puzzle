@@ -88,8 +88,28 @@ boardEl.addEventListener("click", (e) => {
   const tileEl = e.target.closest(".tile");
   if (!tileEl || tileEl.classList.contains("empty")) return;
   const index = parseInt(tileEl.dataset.index, 10);
-  tryMoveTile(index);
+  const moved = tryMoveTile(index);
+  if (moved && isSolved()) {
+    handleSolved();
+  }
 });
+
+// ---------- Win detection ----------
+function isSolved() {
+  for (let i = 0; i < 15; i++) {
+    if (tiles[i] !== i + 1) return false;
+  }
+  return tiles[15] === EMPTY;
+}
+
+const winMessageEl = document.getElementById("win-message");
+const winSummaryEl = document.getElementById("win-summary");
+
+function handleSolved() {
+  stopTimer();
+  winSummaryEl.textContent = `${moveCount} moves, ${formatTime(elapsedSeconds)}`;
+  winMessageEl.classList.remove("hidden");
+}
 
 tiles = createSolvedBoard();
 renderBoard();
